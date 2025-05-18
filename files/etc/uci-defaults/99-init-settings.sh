@@ -20,11 +20,11 @@ echo "Tunnel Installed: $(opkg list-installed | grep -e luci-app-openclash -e lu
 echo "###############################################"
 
 # Set login root password
-(echo "friwrt"; sleep 1; echo "friwrt") | passwd > /dev/null
+(echo "root"; sleep 1; echo "root") | passwd > /dev/null
 
 # Set hostname and Timezone to Asia/Jakarta
 echo "Setup NTP Server and Time Zone to Asia/Jakarta"
-uci set system.@system[0].hostname='friWrt'
+uci set system.@system[0].hostname='Openwrt'
 uci set system.@system[0].timezone='WIB-7'
 uci set system.@system[0].zonename='Asia/Jakarta'
 uci -q delete system.ntp.server
@@ -61,15 +61,15 @@ echo "Setup Wireless if available"
 uci set wireless.@wifi-device[0].disabled='0'
 uci set wireless.@wifi-iface[0].disabled='0'
 uci set wireless.@wifi-iface[0].encryption='psk2'
-uci set wireless.@wifi-iface[0].key='friwrt2024'
+uci set wireless.@wifi-iface[0].key='password'
 uci set wireless.@wifi-device[0].country='ID'
 if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo; then
-  uci set wireless.@wifi-iface[0].ssid='friWrt_5g'
+  uci set wireless.@wifi-iface[0].ssid='Openwrt 5G'
   uci set wireless.@wifi-device[0].channel='149'
   uci set wireless.radio0.htmode='HT40'
   uci set wireless.radio0.band='5g'
 else
-  uci set wireless.@wifi-iface[0].ssid='friWrt_2g'
+  uci set wireless.@wifi-iface[0].ssid='Openwrt'
   uci set wireless.@wifi-device[0].channel='1'
   uci set wireless.@wifi-device[0].band='2g'
 fi
@@ -91,17 +91,20 @@ else
   echo "No wireless device detected."
 fi
 
-# custom repo and Disable opkg signature check
-echo "Setup custom repo using MyOPKG Repo"
-if grep -qE '^VERSION_ID="21' /etc/os-release; then
-  sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
-  echo "src/gz custom_generic https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/21.02/generic" >> /etc/opkg/customfeeds.conf
-  echo "src/gz custom_arch https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/21.02/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')" >> /etc/opkg/customfeeds.conf
-else
-  sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
-  echo "src/gz custom_generic https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/main/generic" >> /etc/opkg/customfeeds.conf
-  echo "src/gz custom_arch https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/main/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')" >> /etc/opkg/customfeeds.conf
-fi
+ custom repo and Disable opkg signature check
+#echo "Setup custom repo using MyOPKG Repo"
+#if grep -qE '^VERSION_ID="21' /etc/os-release; then
+#  sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
+#  echo "src/gz custom_generic https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/21.02/generic" >> /etc/opkg/customfeeds.conf
+#  echo "src/gz custom_arch https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/21.02/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')" >> /etc/opkg/customfeeds.conf
+#else
+#  sed -i 's/option check_signature/# option check_signature/g' /etc/opkg.conf
+#  echo "src/gz custom_generic https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/main/generic" >> /etc/opkg/customfeeds.conf
+#  echo "src/gz custom_arch https://raw.githubusercontent.com/lrdrdn/my-opkg-repo/main/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')" >> /etc/opkg/customfeeds.conf
+#fi
+echo "Setup custom repo using Kiddin9 Repo"
+echo "src/gz openwrt_kiddin9 https://dl.openwrt.ai/latest/packages/$(grep "OPENWRT_ARCH" /etc/os-release | awk -F '"' '{print $2}')/kiddin9" >> /etc/opkg/customfeeds.conf
+
 
 # setting firewall for samba4
 echo "Setup SAMBA4 firewall"
@@ -132,8 +135,8 @@ uci set firewall.samba_smb_nt.target="NOTRACK"
 uci commit firewall
 
 # set argon as default theme
-echo "Setup Default Theme"
-uci set luci.main.mediaurlbase='/luci-static/argon' && uci commit
+#echo "Setup Default Theme"
+#uci set luci.main.mediaurlbase='/luci-static/argon' && uci commit
 
 echo "Setup misc settings"
 # remove login password required when accessing terminal
@@ -219,7 +222,7 @@ if grep -q "Raspberry Pi 4\|Raspberry Pi 3" /proc/cpuinfo; then
 fi
 
 # enable adguardhome
-chmod +x /usr/bin/adguardhome
+#chmod +x /usr/bin/adguardhome
 #bash /usr/bin/adguardhome enable_agh
 
 echo "All first boot setup complete!"
